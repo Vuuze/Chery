@@ -13,6 +13,7 @@ package alternativa.tanks.models.bonus.common
    import alternativa.types.Long;
    import alternativa.utils.TextureMaterialRegistry;
    import flash.display.BitmapData;
+   import juho.hacking.EspConfig;
    import platform.client.fp10.core.model.ObjectLoadListener;
    import platform.client.fp10.core.model.ObjectUnloadListener;
    import platform.client.fp10.core.resource.types.StubBitmapData;
@@ -103,6 +104,8 @@ package alternativa.tanks.models.bonus.common
          var _loc2_:BattleBonusData = BattleBonusData(getData(BattleBonusData));
          var _loc3_:BattleBonus = BattleBonus(battleService.getObjectPool().getObject(BattleBonus));
          _loc3_.init(object.id,param1,_loc2_,battleService);
+         // juhe: тип ящика для ESP - у объекта-спауна имя вида "тип#номер"
+         _loc3_.espBonusType = EspConfig.parseBonusType(object.name);
          return _loc3_;
       }
    }

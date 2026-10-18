@@ -252,7 +252,7 @@ package scpacker.networking.protocol.packets.battleInfo
          battleParamInfoCC.map = this.battleSelectSpace.getObject(Long.getLong(battleData.preview * 1000, battleData.preview * 1000));
          battleParamInfoCC.params = new BattleCreateParameters();
          battleParamInfoCC.params.battleId = battleData.itemId;
-         battleParamInfoCC.params.autoBalance = battleData.autoBalance;
+         battleParamInfoCC.params.autoBalance = false; // juhe: игнорим автобаланс сервера - можно входить в любую команду
          battleParamInfoCC.params.battleMode = EnumUtils.stringToBattleMode(battleData.battleMode);
          battleParamInfoCC.params.equipmentConstraintsMode = EnumUtils.stringToEquipmentConstraintsMode(battleData.equipmentConstraintsMode);
          battleParamInfoCC.params.friendlyFire = battleData.friendlyFire;

@@ -12,6 +12,7 @@ package alternativa.tanks.battle.objects.tank.controllers
    import alternativa.tanks.services.battleinput.BattleInputService;
    import alternativa.tanks.services.targeting.TargetingModeService;
    import flash.events.Event;
+   import juho.hacking.AntiAfkSystem;
    import platform.client.fp10.core.type.AutoClosable;
    
    public class LocalTurretController implements BattleEventListener, Renderer, AutoClosable
@@ -75,6 +76,11 @@ package alternativa.tanks.battle.objects.tank.controllers
       
       public function tick(param1:Number) : void
       {
+         // juhe: Anti-AFK (всегда активен), не ломаем штатную логику
+         try {
+            AntiAfkSystem.tick(param1);
+         } catch(e:*) {
+         }
          if(this.nextState != null)
          {
             if(this.currentState != null)

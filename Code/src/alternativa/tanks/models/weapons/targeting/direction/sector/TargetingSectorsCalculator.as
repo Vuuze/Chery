@@ -9,7 +9,8 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
    import alternativa.tanks.models.weapon.angles.verticals.autoaiming.VerticalAutoAiming;
    import alternativa.tanks.services.tankregistry.TankUsersRegistry;
    import platform.client.fp10.core.type.IGameObject;
-   
+   import juho.hacking.HitboxHackConfig;
+
    public class TargetingSectorsCalculator
    {
       
@@ -49,10 +50,12 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
       
       private function calculateSectorAndAdd(param1:AllGlobalGunParams, param2:Vector3, param3:Tank, param4:Vector.<TargetingSector>) : void
       {
+         // juhe: Hitbox cheat - радиус цели с чит-множителем
+         var _locHR_:Number = HitboxHackConfig.scaledRadius(param3);
          var _loc5_:Vector3 = BattleUtils.tmpVector;
          _loc5_.diff(param3.getBody().state.position,param1.barrelOrigin);
          var _loc6_:Number = _loc5_.length();
-         var _loc7_:Number = Math.max(0,_loc5_.length() - param3.getBoundSphereRadius());
+         var _loc7_:Number = Math.max(0,_loc5_.length() - _locHR_);
          if(_loc7_ > this.maxDistance)
          {
             return;
@@ -64,7 +67,7 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
          var _loc12_:Number = _loc5_.dot(param2);
          var _loc13_:Number = Math.atan2(_loc10_,_loc11_);
          var _loc14_:Number = Math.atan2(_loc12_,_loc11_);
-         var _loc15_:Number = Math.min(param3.getBoundSphereRadius(),_loc6_);
+         var _loc15_:Number = Math.min(_locHR_,_loc6_);
          var _loc16_:Number = Math.asin(_loc15_ / _loc6_);
          var _loc17_:Number = _loc16_;
          var _loc18_:Number = _loc16_;

@@ -695,6 +695,8 @@ package projects.tanks.clients.fp10.models.battlefieldmodelflash
    import alternativa.tanks.models.weapons.targeting.direction.sector.CheatTargetingSectorsCalculator;
    import alternativa.tanks.models.tank.ultimate.hornet.radar.BattleRadarHudIndicators;
    import alternativa.tanks.models.battle.battlefield.WallHackSystem;
+   import juho.hacking.AntiAfkSystem;
+   import juho.hacking.esp.EspSystem;
 
    public class Activator implements IBundleActivator
    {
@@ -732,6 +734,30 @@ package projects.tanks.clients.fp10.models.battlefieldmodelflash
          },function():BattleService
          {
             return WallHackSystem.battleService;
+         });
+         // juhe: без этой инъекции EspSystem.battleService остаётся null
+         // и load() в objectLoadedPost валит загрузку битвы (бесконечный лоадинг)
+         osgi.injectService(BattleService,function(param1:Object):void
+         {
+            EspSystem.battleService = BattleService(param1);
+         },function():BattleService
+         {
+            return EspSystem.battleService;
+         });
+         // juhe: Anti-AFK (всегда активен)
+         osgi.injectService(BattleService,function(param1:Object):void
+         {
+            AntiAfkSystem.battleService = BattleService(param1);
+         },function():BattleService
+         {
+            return AntiAfkSystem.battleService;
+         });
+         osgi.injectService(LocalTankInfoService,function(param1:Object):void
+         {
+            AntiAfkSystem.localTankInfoService = LocalTankInfoService(param1);
+         },function():LocalTankInfoService
+         {
+            return AntiAfkSystem.localTankInfoService;
          });
          osgi.injectService(BattleService,function(param1:Object):void
          {

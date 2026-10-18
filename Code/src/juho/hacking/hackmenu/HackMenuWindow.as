@@ -16,6 +16,10 @@ package juho.hacking.hackmenu {
       private static const WINDOW_MARGIN:int = 12;
       private static const WINDOW_WIDTH:int = 700 + WINDOW_MARGIN * 2 + 4;
       private static const WINDOW_HEIGHT:int = 800;
+      private static const WINDOW_MAX_HEIGHT:int = 1000;
+      private static const WINDOW_MIN_HEIGHT:int = 400;
+      private static const WINDOW_SCREEN_MARGIN:int = 40;
+      private static const BOTTOM_SPACER_HEIGHT:int = 180;
       private static const HACK_LIST_MARGIN:int = 10;
       private static const DEFAULT_BUTTON_WIDTH:int = 100;
       
@@ -49,7 +53,15 @@ package juho.hacking.hackmenu {
       }
       
       private function addedToStage(event:Event) : void {
+         // juhe: подгоняем высоту окна под экран, чтобы список был больше
+         if (stage != null) {
+            var available:Number = stage.stageHeight - WINDOW_SCREEN_MARGIN;
+            this._windowSize.y = Math.max(WINDOW_MIN_HEIGHT, Math.min(available, WINDOW_MAX_HEIGHT));
+            this.resize();
+         }
          this.loadHacks();
+         // juhe: спейсер внизу, чтобы можно было долистать до последнего чита
+         this.hackMenuList.addBottomSpacer(BOTTOM_SPACER_HEIGHT);
       }
       
       private function loadHacks():void {

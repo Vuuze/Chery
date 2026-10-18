@@ -71,6 +71,7 @@ package alternativa.tanks.models.battle.battlefield
    import alternativa.utils.TextureMaterialRegistry;
    import flash.display.BitmapData;
    import flash.events.Event;
+   import juho.hacking.esp.EspSystem;
    import flash.events.KeyboardEvent;
    import flash.media.Sound;
    import flash.net.SharedObject;
@@ -171,6 +172,9 @@ package alternativa.tanks.models.battle.battlefield
       
 
       public static const wallHack:WallHackSystem = new WallHackSystem();
+
+      // juhe: ESP система (маркеры ящиков и мин)
+      public static const espSystem:EspSystem = new EspSystem();
 
       private static const cameraPosition:Vector3 = new Vector3();
       
@@ -561,6 +565,7 @@ package alternativa.tanks.models.battle.battlefield
          battleInfoService.battleLoad();
          putData(AdditionUserTitleSwitcher,new AdditionUserTitleSwitcher());
          wallHack.load();
+         espSystem.load();
       }
       
       private function startTimeStatisticsTimer() : void
@@ -573,6 +578,7 @@ package alternativa.tanks.models.battle.battlefield
       public function objectUnloadedPost() : void
       {
          wallHack.unload();
+         espSystem.unload();
          this.battleActive = false;
          this.clearServerNumber();
          battleEventDispatcher.dispatchEvent(new BattleUnloadEvent());

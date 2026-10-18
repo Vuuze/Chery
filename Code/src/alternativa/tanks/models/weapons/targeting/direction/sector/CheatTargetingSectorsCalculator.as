@@ -2,6 +2,7 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
 {
    import alternativa.math.Vector3;
    import alternativa.tanks.battle.BattleUtils;
+   import alternativa.tanks.battle.objects.tank.ClientTankState;
    import alternativa.tanks.battle.objects.tank.Tank;
    import alternativa.tanks.models.tank.ITankModel;
    import alternativa.tanks.models.weapon.AllGlobalGunParams;
@@ -10,6 +11,7 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
    import alternativa.tanks.services.tankregistry.TankUsersRegistry;
    import platform.client.fp10.core.type.IGameObject;
    import alternativa.tanks.models.weapons.targeting.debug.TargetingVisualDebug;
+   import juho.hacking.HitboxHackConfig;
    
    public class CheatTargetingSectorsCalculator
    {
@@ -55,10 +57,17 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
       
       private function calculateSectorAndAdd(gunParams:AllGlobalGunParams, upDirection:Vector3, targetTank:Tank, sectors:Vector.<TargetingSector2D>) : void
       {
+         // juhe: мёртвые/отсутствующие танки - не цель (аим и триггер не ловят трупы)
+         if(targetTank == null || targetTank.health <= 0 || targetTank.state == ClientTankState.DEAD)
+         {
+            return;
+         }
+         // juhe: Hitbox cheat - радиус цели с чит-множителем
+         var hitboxRadius:Number = HitboxHackConfig.scaledRadius(targetTank);
          var toTarget:Vector3 = BattleUtils.tmpVector;
          toTarget.diff(targetTank.getBody().state.position,gunParams.barrelOrigin);
          var distanceToTarget:Number = toTarget.length();
-         var effectiveDistance:Number = Math.max(0,toTarget.length() - targetTank.getBoundSphereRadius());
+         var effectiveDistance:Number = Math.max(0,toTarget.length() - hitboxRadius);
          if(effectiveDistance > this.maxDistance)
          {
             return;
@@ -78,7 +87,7 @@ package alternativa.tanks.models.weapons.targeting.direction.sector
              toTarget.dot(gunForward)
          );
 
-         var effectiveRadius:Number = Math.min(targetTank.getBoundSphereRadius(),distanceToTarget);
+         var effectiveRadius:Number = Math.min(hitboxRadius,distanceToTarget);
          var angularRadius:Number = Math.asin(effectiveRadius / distanceToTarget);
          var horizontalTolerance:Number = angularRadius;
          var verticalTolerance:Number = angularRadius;

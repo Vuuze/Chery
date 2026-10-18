@@ -13,6 +13,7 @@ package alternativa.tanks.models.weapon.twins
    import alternativa.tanks.battle.objects.tank.Weapon;
    import alternativa.tanks.models.weapon.IWeaponModel;
    import flash.utils.Dictionary;
+   import juho.hacking.WeaponHackConfig;
    import platform.client.fp10.core.model.ObjectLoadListener;
    import platform.client.fp10.core.type.IGameObject;
    import projects.tanks.client.battlefield.models.tankparts.weapon.twins.ITwinsModelBase;
@@ -49,6 +50,8 @@ package alternativa.tanks.models.weapon.twins
          _loc1_.distance = BattleUtils.toClientScale(_loc1_.distance);
          _loc1_.speed = BattleUtils.toClientScale(_loc1_.speed);
          _loc1_.shellRadius = BattleUtils.toClientScale(_loc1_.shellRadius);
+         // juhe: применить множитель скорости снаряда из чит-меню
+         WeaponHackConfig.applyTwinsCC(_loc1_);
       }
       
       [Obfuscation(rename="false")]

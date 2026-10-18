@@ -23,6 +23,7 @@ package scpacker.networking.protocol.packets.bonusregion
    import alternativa.tanks.models.tank.ITankModel;
    import alternativa.tanks.battle.objects.tank.Tank;
    import alternativa.math.Vector3;
+   import juho.hacking.EspConfig;
    
    public class BonusRegionPacketHandler extends AbstractPacketHandler
    {
@@ -68,12 +69,42 @@ package scpacker.networking.protocol.packets.bonusregion
       
       private function showDropZone(param1:ShowDropZoneInPacket) : void
       {
+         // juhe: ESP - запоминаем точку падения голда для подсветки.
+         // Позиция уже в клиентских юнитах (см. BonusRegionService - берётся 1-в-1)
+         if(param1.bonusRegion != null && param1.bonusRegion.regionType == BonusesType.GOLD
+               && param1.bonusRegion.position != null)
+         {
+            EspConfig.registerGoldZone(param1.bonusRegion.position.x,
+                                       param1.bonusRegion.position.y,
+                                       param1.bonusRegion.position.z);
+         }
          bonusRegionService.addAndShowRegion(param1.bonusRegion);
       }
       
       private function hideDropZone(param1:HideDropZoneInPacket) : void
       {
+         // juhe: ESP - убираем точку падения голда (мэчим по координатам)
+         if(param1.bonusRegion != null && param1.bonusRegion.regionType == BonusesType.GOLD
+               && param1.bonusRegion.position != null)
+         {
+            this.removeGoldZoneByPosition(param1.bonusRegion.position);
+         }
          bonusRegionService.hideAndRemoveRegion(param1.bonusRegion);
+      }
+
+      // juhe: ищет зону голда по координатам из hide-пакета и снимает её с ESP
+      private function removeGoldZoneByPosition(param1:Vector3d) : void
+      {
+         var zone:Object;
+         for(zone in EspConfig.goldZones)
+         {
+            if(Math.abs(zone.px - param1.x) < 300
+                  && Math.abs(zone.py - param1.y) < 300)
+            {
+               EspConfig.unregisterGoldZone(zone);
+               return;
+            }
+         }
       }
    }
 }

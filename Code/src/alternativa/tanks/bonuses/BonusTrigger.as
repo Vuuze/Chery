@@ -10,19 +10,21 @@ package alternativa.tanks.bonuses
    import alternativa.tanks.battle.BattleRunnerProvider;
    import alternativa.tanks.battle.Trigger;
    import alternativa.tanks.physics.CollisionGroup;
-   
+   import juho.hacking.BoxHitboxHackConfig;
+
    public class BonusTrigger extends BattleRunnerProvider implements Trigger
    {
-      
+
       private var bonus:BattleBonus;
-      
+
       private var collisionBox:CollisionBox;
-      
+
       public function BonusTrigger(param1:BattleBonus)
       {
          super();
          this.bonus = param1;
-         var _loc2_:Number = BonusConst.BONUS_HALF_SIZE;
+         // juhe: Box Hitbox cheat - хитбокс подбора ящика с чит-множителем
+         var _loc2_:Number = BoxHitboxHackConfig.halfSize();
          this.collisionBox = new CollisionBox(new Vector3(_loc2_,_loc2_,_loc2_),CollisionGroup.BONUS_WITH_TANK,PhysicsMaterial.DEFAULT_MATERIAL);
       }
       
@@ -59,6 +61,8 @@ package alternativa.tanks.bonuses
       
       public function checkTrigger(param1:Body) : void
       {
+         // juhe: Box Hitbox cheat - настройка из меню может меняться на ходу
+         this.applyHalfSize();
          var _loc3_:CollisionShape = null;
          var _loc2_:int = 0;
          while(_loc2_ < param1.numCollisionShapes)
@@ -70,6 +74,16 @@ package alternativa.tanks.bonuses
                return;
             }
             _loc2_++;
+         }
+      }
+
+      private function applyHalfSize() : void
+      {
+         var _loc1_:Number = BoxHitboxHackConfig.halfSize();
+         if(this.collisionBox.hs.x != _loc1_)
+         {
+            this.collisionBox.hs.reset(_loc1_,_loc1_,_loc1_);
+            this.collisionBox.calculateAABB();
          }
       }
    }

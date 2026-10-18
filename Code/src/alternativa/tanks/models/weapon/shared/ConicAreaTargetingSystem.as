@@ -6,9 +6,14 @@ package alternativa.tanks.models.weapon.shared
    import alternativa.physics.collision.types.RayHit;
    import alternativa.tanks.physics.CollisionGroup;
    import alternativa.tanks.physics.TanksCollisionDetector;
+   import alternativa.tanks.models.tank.ITankModel;
    import alternativa.tanks.utils.EncryptedNumber;
    import alternativa.tanks.utils.EncryptedNumberImpl;
+   import alternativa.tanks.battle.objects.tank.ClientTankState;
+   import alternativa.tanks.battle.objects.tank.Tank;
+   import alternativa.tanks.models.weapons.targeting.direction.sector.CheatTargetingSectorsCalculator;
    import flash.utils.Dictionary;
+   import platform.client.fp10.core.type.IGameObject;
    
    public class ConicAreaTargetingSystem
    {
@@ -85,6 +90,13 @@ package alternativa.tanks.models.weapon.shared
             this._xAxis.transform3(this.rotationMatrix);
             _loc14_++;
          }
+         // juhe: угол из меню 270+ градусов - режим "по окружности": добираем
+         // цели радиально (включая вперёд и сзади), стены блокируют, союзники
+         // и трупы не задеваются
+         if(this.halfConeAngle.getNumber() * 2 >= 4.6)
+         {
+            this.addRadialTargets(param1,param4,_loc11_);
+         }
          var _loc15_:int = 0;
          for(_loc16_ in this.distanceByTarget)
          {
@@ -105,6 +117,61 @@ package alternativa.tanks.models.weapon.shared
          this.distanceByTarget = null;
       }
       
+      // juhe: радиальный добор целей в сфере вокруг дула (режим "по окружности")
+      private function addRadialTargets(param1:Body, param4:Vector3, param11:Number) : void
+      {
+         var registry:* = CheatTargetingSectorsCalculator.tankUsersRegistry;
+         if(registry == null)
+         {
+            return;
+         }
+         var shooterTank:Tank = param1.tank;
+         var maxDist:Number = this.range.getNumber() + param11;
+         for each(var obj:IGameObject in registry.getUsers())
+         {
+            if(obj == null)
+            {
+               continue;
+            }
+            var tank:Tank = ITankModel(obj.adapt(ITankModel)).getTank();
+            if(tank == null || tank == shooterTank)
+            {
+               continue;
+            }
+            if(tank.health <= 0 || tank.state == ClientTankState.DEAD)
+            {
+               continue; // трупы не едим
+            }
+            if(shooterTank != null && tank.isSameTeam(shooterTank.teamType))
+            {
+               continue; // свои не едим
+            }
+            var body:Body = tank.getBody();
+            if(body == null || this.distanceByTarget[body] != null)
+            {
+               continue; // уже зафиксирован штатными лучами
+            }
+            var to:Vector3 = new Vector3();
+            to.diff(body.state.position,param4);
+            var dist:Number = to.length();
+            if(dist > maxDist || dist < 1)
+            {
+               continue;
+            }
+            to.normalize();
+            // один луч до цели - если попали именно в неё, стен нет
+            if(this.collisionDetector.raycast(param4,to,COLLISION_GROUP,dist,this.collisionFilter,this.rayHit) && this.rayHit.shape.body == body)
+            {
+               if(this.targetValidator.isValidTarget(body))
+               {
+                  this.collisionFilter.addTarget(body);
+                  this.distanceByTarget[body] = this.rayHit.t;
+                  this.hitPointByTarget[body] = this.rayHit.position.clone();
+               }
+            }
+         }
+      }
+
       private function processSector(param1:Vector3, param2:Vector3, param3:Vector3, param4:Number, param5:int, param6:Number) : void
       {
          var _loc7_:Number = 0;

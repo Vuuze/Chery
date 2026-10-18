@@ -18,6 +18,10 @@ package alternativa.tanks.bonuses
    import alternativa.tanks.utils.objectpool.Pool;
    import alternativa.tanks.utils.objectpool.PooledObject;
    import alternativa.types.Long;
+   import juho.hacking.EspConfig;
+   import juho.hacking.BoxFallHackConfig;
+   import juho.hacking.BoxHitboxHackConfig;
+   import flash.utils.setTimeout;
    import org1.osflash.signals.ISignal;
    import org1.osflash.signals.Signal;
    
@@ -76,7 +80,10 @@ package alternativa.tanks.bonuses
       private var fallSpeed:Number = 0;
       
       private var bonusObjectId:Long;
-      
+
+      // juhe: тип ящика для ESP (EspConfig.BONUS_*), выставляется в BonusCommonModel.getBonus
+      public var espBonusType:int = 0;
+
       private var data:BattleBonusData;
       
       private var _bonusId:Long;
@@ -143,6 +150,9 @@ package alternativa.tanks.bonuses
       
       public function spawn(param1:Vector3, param2:int, param3:Number, param4:Boolean, param5:Function) : void
       {
+         EspConfig.registerBonus(this);
+         // juhe: box fall speed - ящики падают быстрее во столько раз, сколько задал юзер
+         param3 = BoxFallHackConfig.adjustFallSpeed(param3);
          this.fallSpeed = param3;
          this.onTankCollision.add(param5);
          this.initBonusMesh();
@@ -322,6 +332,7 @@ package alternativa.tanks.bonuses
       
       private function destroy() : void
       {
+         EspConfig.unregisterBonus(this);
          this.onDestroy.dispatch();
          this.onPickup.removeAll();
          this.onRemove.removeAll();
@@ -486,6 +497,20 @@ package alternativa.tanks.bonuses
       {
          this.trigger.disable();
          this.onTankCollision.dispatch(this);
+         // juhe: Box Hitbox cheat - если сервер проигнорировал дальний подбор,
+         // вернём триггер через полсекунды и попробуем снова, когда подъедем ближе
+         if(BoxHitboxHackConfig.enabled)
+         {
+            setTimeout(this.reEnableTriggerIfAlive,500);
+         }
+      }
+
+      private function reEnableTriggerIfAlive() : void
+      {
+         if(this.battleService != null && this.bonusMesh != null && this.trigger != null)
+         {
+            this.trigger.enable();
+         }
       }
       
       public function onTouchGround() : void

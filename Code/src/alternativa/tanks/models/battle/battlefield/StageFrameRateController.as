@@ -18,9 +18,10 @@ package alternativa.tanks.models.battle.battlefield
       [Inject] // added
       public static var display:IDisplay;
       
-      private static const MAX_HARDWARE_FRAME_RATE:Number = 60;
+      // juhe: ограничение FPS снято - рендерим на максимально возможной частоте
+      private static const MAX_HARDWARE_FRAME_RATE:Number = 500;
       
-      private static const MAX_SOFTWARE_FRAME_RATE:Number = 40;
+      private static const MAX_SOFTWARE_FRAME_RATE:Number = 500;
       
       private static const MIN_FRAMERATE:int = 10;
       

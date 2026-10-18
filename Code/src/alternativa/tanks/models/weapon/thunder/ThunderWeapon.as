@@ -17,6 +17,7 @@ package alternativa.tanks.models.weapon.thunder
    import alternativa.tanks.utils.EncryptedInt;
    import alternativa.tanks.utils.EncryptedIntImpl;
    import flash.utils.getTimer;
+   import juho.hacking.TriggerBotConfig;
    import projects.tanks.client.garage.models.item.properties.ItemProperty;
    
    public class ThunderWeapon extends BattleRunnerProvider implements Weapon, LogicUnit
@@ -124,6 +125,11 @@ package alternativa.tanks.models.weapon.thunder
       
       public function runLogic(param1:int, param2:int) : void
       {
+         // juhe: триггербот - стреляем сами, когда в прицеле вражеский танк
+         if(TriggerBotConfig.thunderEnabled() && this.enabled && param1 >= this.nextTime.getInt() && this.hasEnemyOnTarget())
+         {
+            this.shoot(param1);
+         }
          if(this.controller.wasActive())
          {
             if(this.enabled && param1 >= this.nextTime.getInt())
@@ -134,6 +140,28 @@ package alternativa.tanks.models.weapon.thunder
          }
       }
       
+      // juhe: true, если на линии прицела (с учётом Aim cheat) вражеский танк
+      private function hasEnemyOnTarget() : Boolean
+      {
+         this.weaponPlatform.getAllGunParams(gunParams);
+         if(!BattleUtils.isTurretAboveGround(this.weaponPlatform.getBody(),gunParams))
+         {
+            return false;
+         }
+         var _loc1_:HitInfo = new HitInfo();
+         if(!this.getTarget(gunParams,_loc1_))
+         {
+            return false;
+         }
+         if(_loc1_.body == null || !BattleUtils.isTankBody(_loc1_.body))
+         {
+            return false;
+         }
+         var _loc2_:Tank = _loc1_.body.tank;
+         var _loc3_:Tank = this.weaponPlatform.getBody().tank;
+         return _loc2_ != null && _loc3_ != null && _loc2_ != _loc3_ && !_loc2_.isSameTeam(_loc3_.teamType) && TriggerBotConfig.isValidTarget(_loc2_) && TriggerBotConfig.withinAimSectors(gunParams,_loc2_);
+      }
+
       private function shoot(param1:int) : void
       {
          var _loc2_:Number = NaN;

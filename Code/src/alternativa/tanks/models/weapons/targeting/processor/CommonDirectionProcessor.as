@@ -41,21 +41,22 @@ package alternativa.tanks.models.weapons.targeting.processor
       
       protected function raycast(param1:AllGlobalGunParams, param2:Vector3, param3:RayHit) : Boolean
       {
-         var _loc4_:Vector3 = null;
-         if(!this.shotFromMuzzle || param2.dot(param1.direction) > this.COS_ALMOST_ZERO_ANGLE)
-         {
-            _loc4_ = param1.barrelOrigin;
-         }
-         else
-         {
-            _loc4_ = param1.muzzlePosition;
-         }
+         var _loc4_:Vector3 = this.getRayOrigin(param1,param2);
          if(this.collisionDetector.raycast(_loc4_,param2,CollisionGroup.WEAPON,this.maxDistance,this.filter,param3))
          {
             param3.staticHit = !BattleUtils.isTankBody(param3.shape.body) || MarginalCollider.segmentWithStaticIntersection(_loc4_,param3.position);
             return true;
          }
          return false;
+      }
+
+      protected function getRayOrigin(param1:AllGlobalGunParams, param2:Vector3) : Vector3
+      {
+         if(!this.shotFromMuzzle || param2.dot(param1.direction) > this.COS_ALMOST_ZERO_ANGLE)
+         {
+            return param1.barrelOrigin;
+         }
+         return param1.muzzlePosition;
       }
    }
 }

@@ -24,6 +24,7 @@ package alternativa.tanks.models.weapon.freeze
    import alternativa.tanks.models.weapon.streamweapon.StreamWeaponData;
    import alternativa.tanks.physics.TanksCollisionDetector;
    import flash.utils.Dictionary;
+   import juho.hacking.WeaponHackConfig;
    import platform.client.fp10.core.model.ObjectLoadListener;
    import platform.client.fp10.core.type.IGameObject;
    import projects.tanks.client.battlefield.models.tankparts.weapon.freeze.FreezeCC;

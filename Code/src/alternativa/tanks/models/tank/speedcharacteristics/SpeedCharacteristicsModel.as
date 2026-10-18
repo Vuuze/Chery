@@ -6,6 +6,7 @@ package alternativa.tanks.models.tank.speedcharacteristics
    import alternativa.tanks.models.tank.LocalTankParams;
    import projects.tanks.client.battlefield.models.user.speedcharacteristics.ISpeedCharacteristicsModelBase;
    import projects.tanks.client.battlefield.models.user.speedcharacteristics.SpeedCharacteristicsModelBase;
+   import juho.hacking.SpeedHackConfig;
    import juho.hacking.event.HackEventDispatcher;
    import juho.hacking.event.TankSpecificationsChangedEvent;
    
@@ -48,6 +49,8 @@ package alternativa.tanks.models.tank.speedcharacteristics
          _loc2_.setSideAcceleration(BattleUtils.toClientScale(getInitParam().sideAcceleration));
          _loc2_.setTurnAcceleration(getInitParam().turnAcceleration);
          _loc2_.setReverseTurnAcceleration(getInitParam().reverseTurnAcceleration);
+         // juhe: запомнить базовое ускорение поворота корпуса для авто-режима спидхака
+         SpeedHackConfig.baseTurnAcceleration = getInitParam().turnAcceleration;
          this.setTankSpec(_loc1_,getInitParam().currentSpeed,getInitParam().currentTurnSpeed,getInitParam().currentTurretRotationSpeed,getInitParam().currentAcceleration,true);
       }
       
@@ -71,6 +74,11 @@ package alternativa.tanks.models.tank.speedcharacteristics
          _loc7_.turretRotationSpeed = param4;
          _loc7_.acceleration = param5;
          putData(CurrentSpeedValues,_loc7_);
+         // juhe: базовые (легальные) характеристики с сервера для авто-режима спидхака
+         SpeedHackConfig.baseSpeed = BattleUtils.toClientScale(param2);
+         SpeedHackConfig.baseTurnSpeed = param3;
+         SpeedHackConfig.baseTurretTurnSpeed = param4;
+         SpeedHackConfig.baseAcceleration = BattleUtils.toClientScale(param5);
          var _loc8_:Tank = param1.getTank();
          _loc8_.setMaxSpeed(BattleUtils.toClientScale(param2),param6);
          _loc8_.setMaxTurnSpeed(param3,param6);

@@ -21,6 +21,9 @@ package alternativa.tanks.models.battle.battlefield.mine
    import alternativa.types.Long;
    import flash.geom.ColorTransform;
    import flash.utils.getTimer;
+   import juho.hacking.EspConfig;
+   import alternativa.osgi.OSGi;
+   import projects.tanks.clients.fp10.libraries.tanksservices.service.userproperties.IUserPropertiesService;
    import projects.tanks.client.battleservice.model.battle.team.BattleTeam;
    import projects.tanks.clients.fp10.libraries.tanksservices.service.battle.IBattleInfoService;
    
@@ -31,7 +34,9 @@ package alternativa.tanks.models.battle.battlefield.mine
       public static var battleInfoService:IBattleInfoService;
       
       private static var pool:ProximityMine;
-      
+
+      // juhe: кэш сервиса, чтобы не дёргать OSGi на каждом кадре ESP
+      private static var userPropertiesService:IUserPropertiesService;
       private static const FLASH_GROW:int = 1;
       
       private static const FLASH_FADE:int = 2;
@@ -152,8 +157,28 @@ package alternativa.tanks.models.battle.battlefield.mine
          this.collisionPrimitive.calculateAABB();
       }
       
+      // juhe: отношение владельца мины к локальному игроку (для цвета ESP):
+      // 0 - своя мина, 1 - союзная, 2 - вражеская
+      public function getOwnerRelation() : int
+      {
+         if(userPropertiesService == null)
+         {
+            userPropertiesService = IUserPropertiesService(OSGi.getInstance().getService(IUserPropertiesService));
+         }
+         if(userPropertiesService != null && this.ownerId == userPropertiesService.userId)
+         {
+            return 0;
+         }
+         if(this.localTank != null && this.localTank.isSameTeam(this.teamType))
+         {
+            return 1;
+         }
+         return 2;
+      }
+
       public function addToGame() : void
       {
+         EspConfig.registerMine(this);
          getBattleRunner().addTrigger(this);
          var _loc1_:BattleScene3D = battleService.getBattleScene3D();
          _loc1_.addObject(this.mesh);
@@ -162,6 +187,7 @@ package alternativa.tanks.models.battle.battlefield.mine
       
       public function removeFromGame() : void
       {
+         EspConfig.unregisterMine(this);
          getBattleRunner().removeTrigger(this);
          var _loc1_:BattleScene3D = battleService.getBattleScene3D();
          _loc1_.removeRenderer(this,0);
